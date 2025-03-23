@@ -1,0 +1,62 @@
+Update Menu
+---
+tags:
+  - Menu
+security:
+  - Bearer: []
+parameters:
+  - name: id
+    in: path
+    type: integer
+    required: true
+    description: Menu ID
+  - name: body
+    in: body
+    required: true
+    schema:
+      type: object
+      properties:
+        title:
+          type: string
+          description: "Maximum 2 titles separated by comma"
+        menu_name:
+          type: string
+        menu_url:
+          type: string
+        menu_order:
+          type: integer
+        is_active:
+          type: boolean
+responses:
+  200:
+    description: Menu updated successfully
+    schema:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        menu_name:
+          type: string
+        menu_url:
+          type: string
+        menu_order:
+          type: integer
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: datetime
+        updated_at:
+          type: string
+          format: datetime
+
+  404:
+    description: Menu not found
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Menu not found"

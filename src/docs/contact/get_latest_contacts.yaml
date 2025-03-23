@@ -1,0 +1,32 @@
+Get Latest Pending Contacts
+---
+tags:
+  - Contact
+security:
+  - Bearer: []
+responses:
+  200:
+    description: Successfully retrieved latest pending contacts
+    schema:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              email:
+                type: string
+              subject:
+                type: string
+              content:
+                type: string
+              status:
+                type: string
+              created_at:
+                type: string
+                format: datetime

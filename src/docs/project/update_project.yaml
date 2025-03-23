@@ -1,0 +1,77 @@
+Update Project
+---
+tags:
+  - Project
+security:
+  - Bearer: []
+parameters:
+  - name: id
+    in: path
+    type: integer
+    required: true
+    description: Project ID
+  - name: body
+    in: body
+    required: true
+    schema:
+      type: object
+      properties:
+        title:
+          type: string
+        image:
+          type: string
+        description:
+          type: string
+        project_url:
+          type: string
+        github_url:
+          type: string
+        technologies:
+          type: string
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+responses:
+  200:
+    description: Project updated successfully
+    schema:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        image:
+          type: string
+        description:
+          type: string
+        project_url:
+          type: string
+        github_url:
+          type: string
+        technologies:
+          type: string
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        created_at:
+          type: string
+          format: datetime
+        updated_at:
+          type: string
+          format: datetime
+
+  404:
+    description: Project not found
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Project not found"

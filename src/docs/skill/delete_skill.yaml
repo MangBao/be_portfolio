@@ -1,0 +1,30 @@
+Delete Skill
+---
+tags:
+  - Skill
+security:
+  - Bearer: []
+parameters:
+  - name: id
+    in: path
+    type: integer
+    required: true
+    description: Skill ID
+responses:
+  200:
+    description: Skill deleted successfully
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Skill deleted successfully"
+
+  404:
+    description: Skill not found
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Skill not found"

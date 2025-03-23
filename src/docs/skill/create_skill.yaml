@@ -1,0 +1,66 @@
+Create New Skill
+---
+tags:
+  - Skill
+security:
+  - Bearer: []
+parameters:
+  - name: body
+    description: Skill data
+    in: body
+    required: true
+    schema:
+      type: object
+      required:
+        - "skill_name"
+      properties:
+        skill_name:
+          type: string
+          example: "React.js"
+        icon_skill:
+          type: string
+          example: "https://example.com/react-icon.png"
+        short_desc:
+          type: string
+          example: "Frontend JavaScript library"
+        proficiency:
+          type: integer
+          minimum: 0
+          maximum: 100
+          example: 85
+        category:
+          type: string
+          example: "Frontend"
+responses:
+  201:
+    description: Skill created successfully
+    schema:
+      type: object
+      properties:
+        id:
+          type: integer
+        skill_name:
+          type: string
+        icon_skill:
+          type: string
+        short_desc:
+          type: string
+        proficiency:
+          type: integer
+        category:
+          type: string
+        created_at:
+          type: string
+          format: datetime
+        updated_at:
+          type: string
+          format: datetime
+
+  400:
+    description: Bad request - Invalid input data
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Skill name is required"

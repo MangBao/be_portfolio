@@ -1,0 +1,30 @@
+Delete Experience
+---
+tags:
+  - Experience
+security:
+  - Bearer: []
+parameters:
+  - name: id
+    in: path
+    type: integer
+    required: true
+    description: Experience ID
+responses:
+  200:
+    description: Experience deleted successfully
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Experience deleted successfully"
+
+  404:
+    description: Experience not found
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Experience not found"

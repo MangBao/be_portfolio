@@ -1,0 +1,70 @@
+Create New Contact Message
+---
+tags:
+  - Contact
+parameters:
+  - name: body
+    description: Contact message data
+    in: body
+    required: true
+    schema:
+      type: object
+      required:
+        - "name"
+        - "email"
+        - "subject"
+        - "content"
+      properties:
+        name:
+          type: string
+          example: "John Doe"
+          description: "Sender's name"
+        email:
+          type: string
+          format: email
+          example: "john@example.com"
+          description: "Sender's email address"
+        subject:
+          type: string
+          example: "Project Inquiry"
+          description: "Message subject"
+        content:
+          type: string
+          example: "I would like to discuss a potential project..."
+          description: "Message content (minimum 10 characters)"
+responses:
+  201:
+    description: Contact message sent successfully
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Contact message sent successfully"
+        contact:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            email:
+              type: string
+            subject:
+              type: string
+            content:
+              type: string
+            status:
+              type: string
+            created_at:
+              type: string
+              format: datetime
+
+  400:
+    description: Bad request - Invalid input data
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "All fields (name, email, subject, content) are required"

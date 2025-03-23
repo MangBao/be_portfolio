@@ -1,0 +1,41 @@
+Get Latest Projects
+---
+tags:
+  - Project
+responses:
+  200:
+    description: Successfully retrieved latest projects
+    schema:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              title:
+                type: string
+              image:
+                type: string
+              description:
+                type: string
+              project_url:
+                type: string
+              github_url:
+                type: string
+              technologies:
+                type: string
+              start_date:
+                type: string
+                format: date
+              end_date:
+                type: string
+                format: date
+              created_at:
+                type: string
+                format: datetime
+              updated_at:
+                type: string
+                format: datetime

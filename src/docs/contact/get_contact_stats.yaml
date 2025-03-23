@@ -1,0 +1,24 @@
+Get Contact Statistics
+---
+tags:
+  - Contact
+security:
+  - Bearer: []
+responses:
+  200:
+    description: Successfully retrieved contact statistics
+    schema:
+      type: object
+      properties:
+        total:
+          type: integer
+          example: 100
+        pending:
+          type: integer
+          example: 25
+        replied:
+          type: integer
+          example: 65
+        spam:
+          type: integer
+          example: 10

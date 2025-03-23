@@ -1,0 +1,62 @@
+Batch Create Skills
+---
+tags:
+  - Skill
+security:
+  - Bearer: []
+parameters:
+  - name: body
+    description: Array of skills data
+    in: body
+    required: true
+    schema:
+      type: object
+      required:
+        - "skills"
+      properties:
+        skills:
+          type: array
+          items:
+            type: object
+            required:
+              - "skill_name"
+            properties:
+              skill_name:
+                type: string
+              icon_skill:
+                type: string
+              short_desc:
+                type: string
+              proficiency:
+                type: integer
+                minimum: 0
+                maximum: 100
+              category:
+                type: string
+responses:
+  201:
+    description: Skills created successfully
+    schema:
+      type: object
+      properties:
+        created:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              skill_name:
+                type: string
+              icon_skill:
+                type: string
+              short_desc:
+                type: string
+              proficiency:
+                type: integer
+              category:
+                type: string
+        errors:
+          type: array
+          items:
+            type: string

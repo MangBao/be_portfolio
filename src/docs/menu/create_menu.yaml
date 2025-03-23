@@ -1,0 +1,68 @@
+Create New Menu
+---
+tags:
+  - Menu
+security:
+  - Bearer: []
+parameters:
+  - name: body
+    description: Menu data
+    in: body
+    required: true
+    schema:
+      type: object
+      required:
+        - "menu_name"
+        - "menu_url"
+      properties:
+        title:
+          type: string
+          example: "About Me, My Story"
+          description: "Maximum 2 titles separated by comma"
+        menu_name:
+          type: string
+          example: "About"
+        menu_url:
+          type: string
+          example: "/about"
+        menu_order:
+          type: integer
+          example: 1
+          description: "Order of menu item (for sorting)"
+        is_active:
+          type: boolean
+          example: true
+          default: true
+responses:
+  201:
+    description: Menu created successfully
+    schema:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        menu_name:
+          type: string
+        menu_url:
+          type: string
+        menu_order:
+          type: integer
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: datetime
+        updated_at:
+          type: string
+          format: datetime
+
+  400:
+    description: Bad request - Invalid input data
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Menu name and URL are required"

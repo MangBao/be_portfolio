@@ -1,0 +1,65 @@
+User log in
+---
+tags:
+  - Authentication
+parameters:
+  - name: body
+    description: The body should contain the user login credentials
+    in: body
+    required: true
+    schema:
+      type: object
+      required:
+        - "email"
+        - "password"
+      properties:
+        email:
+          type: "string"
+          format: "email"
+          example: "admin@example.com"
+        password:
+          type: "string"
+          format: password
+          example: "********"
+responses:
+  200:
+    description: User successfully logged in
+    schema:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            refresh:
+              type: string
+              description: JWT refresh token
+            access:
+              type: string
+              description: JWT access token
+            username:
+              type: string
+            email:
+              type: string
+          example:
+            refresh: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+            access: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+            username: "admin"
+            email: "admin@example.com"
+
+  400:
+    description: Bad request - Invalid input data
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Invalid input data"
+
+  401:
+    description: Unauthorized - Invalid credentials
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Wrong credentials"

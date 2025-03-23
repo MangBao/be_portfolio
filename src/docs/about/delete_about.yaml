@@ -1,0 +1,24 @@
+Delete About Information
+---
+tags:
+  - About
+security:
+  - Bearer: []
+responses:
+  200:
+    description: About information deleted successfully
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "About information deleted successfully"
+
+  404:
+    description: About information not found
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "No about information found"

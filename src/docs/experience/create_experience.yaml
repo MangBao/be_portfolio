@@ -1,0 +1,84 @@
+Create New Experience
+---
+tags:
+  - Experience
+security:
+  - Bearer: []
+parameters:
+  - name: body
+    description: Experience data
+    in: body
+    required: true
+    schema:
+      type: object
+      required:
+        - "company_name"
+        - "role_name"
+        - "start_date"
+      properties:
+        company_name:
+          type: string
+          example: "Tech Company Inc."
+        role_name:
+          type: string
+          example: "Senior Software Engineer"
+        desc_role:
+          type: array
+          items:
+            type: string
+          example: ["Led development team of 5 members", "Implemented new features", "Improved system performance"]
+        company_location:
+          type: string
+          example: "New York, USA"
+        start_date:
+          type: string
+          format: date
+          example: "2022-01-01"
+        end_date:
+          type: string
+          format: date
+          example: "2023-12-31"
+        is_current:
+          type: boolean
+          example: false
+responses:
+  201:
+    description: Experience created successfully
+    schema:
+      type: object
+      properties:
+        id:
+          type: integer
+        company_name:
+          type: string
+        role_name:
+          type: string
+        desc_role:
+          type: array
+          items:
+            type: string
+        company_location:
+          type: string
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        is_current:
+          type: boolean
+        created_at:
+          type: string
+          format: datetime
+        updated_at:
+          type: string
+          format: datetime
+
+  400:
+    description: Bad request - Invalid input data
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Company name, role name and start date are required"

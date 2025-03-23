@@ -1,0 +1,37 @@
+Get About Information
+---
+tags:
+  - About
+responses:
+  200:
+    description: Successfully retrieved about information
+    schema:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "About Me, My Journey"
+        content:
+          type: string
+          example: "Full-stack developer with 5 years experience, Passionate about web technologies, Expert in modern frameworks"
+        image:
+          type: string
+          example: "https://example.com/profile.jpg"
+        created_at:
+          type: string
+          format: datetime
+        updated_at:
+          type: string
+          format: datetime
+
+  404:
+    description: No about information found
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "No about information found"
