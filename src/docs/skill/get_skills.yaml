@@ -1,0 +1,45 @@
+Get All Skills
+---
+tags:
+  - Skill
+parameters:
+  - name: category
+    in: query
+    type: string
+    required: false
+    description: Filter skills by category
+responses:
+  200:
+    description: Successfully retrieved skills list
+    schema:
+      type: object
+      properties:
+        data:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: integer
+                skill_name:
+                  type: string
+                icon_skill:
+                  type: string
+                short_desc:
+                  type: string
+                proficiency:
+                  type: integer
+                category:
+                  type: string
+                created_at:
+                  type: string
+                  format: datetime
+                updated_at:
+                  type: string
+                  format: datetime
+        categories:
+          type: array
+          items:
+            type: string

@@ -1,0 +1,43 @@
+Get Single Menu
+---
+tags:
+  - Menu
+parameters:
+  - name: id
+    in: path
+    type: integer
+    required: true
+    description: Menu ID
+responses:
+  200:
+    description: Successfully retrieved menu
+    schema:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        menu_name:
+          type: string
+        menu_url:
+          type: string
+        menu_order:
+          type: integer
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: datetime
+        updated_at:
+          type: string
+          format: datetime
+
+  404:
+    description: Menu not found
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Menu not found"

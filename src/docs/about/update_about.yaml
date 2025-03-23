@@ -1,0 +1,55 @@
+Update About Information
+---
+tags:
+  - About
+security:
+  - Bearer: []
+parameters:
+  - name: body
+    description: Updated about information
+    in: body
+    required: true
+    schema:
+      type: object
+      properties:
+        title:
+          type: string
+          example: "About Me, My Journey"
+          description: "Maximum 2 titles separated by comma"
+        content:
+          type: string
+          example: "Full-stack developer with 5 years experience, Passionate about web technologies, Expert in modern frameworks"
+          description: "Maximum 5 content points separated by comma"
+        image:
+          type: string
+          example: "https://example.com/profile.jpg"
+          description: "URL of the profile image"
+responses:
+  200:
+    description: About information updated successfully
+    schema:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        content:
+          type: string
+        image:
+          type: string
+        created_at:
+          type: string
+          format: datetime
+        updated_at:
+          type: string
+          format: datetime
+
+  404:
+    description: About information not found
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "No about information found"

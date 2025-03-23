@@ -1,0 +1,85 @@
+Create New Project
+---
+tags:
+  - Project
+security:
+  - Bearer: []
+parameters:
+  - name: body
+    description: Project data
+    in: body
+    required: true
+    schema:
+      type: object
+      required:
+        - "title"
+        - "description"
+        - "start_date"
+      properties:
+        title:
+          type: string
+          example: "Portfolio Website"
+        image:
+          type: string
+          example: "https://example.com/project-image.jpg"
+        description:
+          type: string
+          example: "A personal portfolio website built with React and Flask"
+        project_url:
+          type: string
+          example: "https://portfolio.example.com"
+        github_url:
+          type: string
+          example: "https://github.com/username/portfolio"
+        technologies:
+          type: string
+          example: "React, Flask, PostgreSQL"
+        start_date:
+          type: string
+          format: date
+          example: "2024-01-01"
+        end_date:
+          type: string
+          format: date
+          example: "2024-03-15"
+responses:
+  201:
+    description: Project created successfully
+    schema:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        image:
+          type: string
+        description:
+          type: string
+        project_url:
+          type: string
+        github_url:
+          type: string
+        technologies:
+          type: string
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        created_at:
+          type: string
+          format: datetime
+        updated_at:
+          type: string
+          format: datetime
+
+  400:
+    description: Bad request - Invalid input data
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Title, description and start date are required"

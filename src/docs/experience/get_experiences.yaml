@@ -1,0 +1,41 @@
+Get All Experiences
+---
+tags:
+  - Experience
+responses:
+  200:
+    description: Successfully retrieved experiences list
+    schema:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              company_name:
+                type: string
+              role_name:
+                type: string
+              desc_role:
+                type: array
+                items:
+                  type: string
+              company_location:
+                type: string
+              start_date:
+                type: string
+                format: date
+              end_date:
+                type: string
+                format: date
+              is_current:
+                type: boolean
+              created_at:
+                type: string
+                format: datetime
+              updated_at:
+                type: string
+                format: datetime

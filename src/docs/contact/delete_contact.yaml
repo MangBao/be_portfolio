@@ -1,0 +1,30 @@
+Delete Contact
+---
+tags:
+  - Contact
+security:
+  - Bearer: []
+parameters:
+  - name: id
+    in: path
+    type: integer
+    required: true
+    description: Contact ID
+responses:
+  200:
+    description: Contact deleted successfully
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Contact deleted successfully"
+
+  404:
+    description: Contact not found
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Contact not found"

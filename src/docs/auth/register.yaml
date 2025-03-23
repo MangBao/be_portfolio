@@ -1,0 +1,68 @@
+User Registration
+---
+tags:
+  - Authentication
+parameters:
+  - name: body
+    description: The body should contain the user registration data
+    in: body
+    required: true
+    schema:
+      type: object
+      required:
+        - "email"
+        - "password"
+        - "username"
+      properties:
+        email:
+          type: "string"
+          format: "email"
+          example: "admin@example.com"
+          description: "User's email address (must be unique)"
+        username:
+          type: "string"
+          example: "admin123"
+          description: "Username (alphanumeric, no spaces, must be unique)"
+          minLength: 3
+        password:
+          type: "string"
+          format: "password"
+          example: "********"
+          description: "User's password (minimum 6 characters)"
+          minLength: 6
+responses:
+  201:
+    description: User successfully registered
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "User created"
+        user:
+          type: object
+          properties:
+            username:
+              type: string
+              example: "admin123"
+            email:
+              type: string
+              example: "admin@example.com"
+
+  400:
+    description: Bad request - Invalid input data
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Password is too short"
+
+  409:
+    description: Conflict - Email or username already exists
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Email is taken"

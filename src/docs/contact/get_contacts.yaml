@@ -1,0 +1,70 @@
+Get All Contacts
+---
+tags:
+  - Contact
+security:
+  - Bearer: []
+parameters:
+  - name: page
+    in: query
+    type: integer
+    required: false
+    default: 1
+    description: Page number
+  - name: per_page
+    in: query
+    type: integer
+    required: false
+    default: 10
+    description: Items per page
+  - name: status
+    in: query
+    type: string
+    required: false
+    description: Filter by status (pending, replied, spam)
+responses:
+  200:
+    description: Successfully retrieved contacts list
+    schema:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              email:
+                type: string
+              subject:
+                type: string
+              content:
+                type: string
+              status:
+                type: string
+              created_at:
+                type: string
+                format: datetime
+              updated_at:
+                type: string
+                format: datetime
+        meta:
+          type: object
+          properties:
+            page:
+              type: integer
+            pages:
+              type: integer
+            total_count:
+              type: integer
+            prev_page:
+              type: integer
+            next_page:
+              type: integer
+            has_next:
+              type: boolean
+            has_prev:
+              type: boolean

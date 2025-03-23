@@ -1,0 +1,14 @@
+Get All Skill Categories
+---
+tags:
+  - Skill
+responses:
+  200:
+    description: Successfully retrieved categories list
+    schema:
+      type: object
+      properties:
+        categories:
+          type: array
+          items:
+            type: string
