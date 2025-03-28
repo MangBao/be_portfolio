@@ -16,9 +16,11 @@ parameters:
         - "menu_url"
       properties:
         title:
-          type: string
-          example: "About Me, My Story"
-          description: "Maximum 2 titles separated by comma"
+          type: array
+          items:
+            type: string
+          example: ["Home", "Dashboard"]
+          description: "Maximum 2 titles, will be stored as a single string separated by semicolon ';'"
         menu_name:
           type: string
           example: "About"
@@ -42,7 +44,9 @@ responses:
         id:
           type: integer
         title:
-          type: string
+          type: array
+          items:
+            type: string
         menu_name:
           type: string
         menu_url:
@@ -59,7 +63,7 @@ responses:
           format: datetime
 
   400:
-    description: Bad request - Invalid input data
+    description: Bad request
     schema:
       type: object
       properties:

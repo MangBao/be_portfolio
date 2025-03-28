@@ -15,8 +15,8 @@ def get_about():
     
     return jsonify({
         'id': about.id,
-        'title': about.title,
-        'content': about.content,
+        'title': about.title.split(';') if about.title else [],
+        'content': about.content.split(';') if about.content else [],
         'image': about.image,
         'created_at': about.created_at,
         'updated_at': about.updated_at
@@ -31,13 +31,19 @@ def create_about():
     if existing_about:
         return jsonify({'error': 'About information already exists. Please update instead.'}), HTTP_400_BAD_REQUEST
     
-    title = request.json.get('title')
-    content = request.json.get('content')
+    title = request.json.get('title', [])
+    content = request.json.get('content', [])
     image = request.json.get('image')
-
+    
     if not title or not content:
         return jsonify({'error': 'Title and content are required'}), HTTP_400_BAD_REQUEST
 
+    if isinstance(content, list):
+        content = ";".join(content)  # Chuyển list thành chuỗi phân tách bởi dấu `;`
+        
+    if isinstance(title, list):
+        title = ";".join(title)
+        
     about = About(
         title=title,
         content=content,
@@ -49,8 +55,8 @@ def create_about():
 
     return jsonify({
         'id': about.id,
-        'title': about.title,
-        'content': about.content,
+        'title': about.title.split(';'),
+        'content': about.content.split(';'),
         'image': about.image,
         'created_at': about.created_at,
         'updated_at': about.updated_at
