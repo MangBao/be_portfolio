@@ -16,8 +16,11 @@ responses:
               id:
                 type: integer
               title:
-                type: string
-                description: "Maximum 2 titles separated by comma"
+                type: array
+                items:
+                  type: string
+                description: "Maximum 2 titles, stored as a single string separated by semicolon ';'"
+                example: ["Home", "Dashboard"]
               menu_name:
                 type: string
               menu_url:

@@ -14,7 +14,7 @@ def get_menus():
     for menu in menus:
         data.append({
             'id': menu.id,
-            'title': menu.title,
+            'title': menu.title.split(';') if menu.title else [],
             'menu_name': menu.menu_name,
             'menu_url': menu.menu_url,
             'menu_order': menu.menu_order,
@@ -47,21 +47,30 @@ def get_menu(id):
 @jwt_required()
 @swag_from('./docs/menu/create_menu.yaml')
 def create_menu():
-    title = request.json.get('title', '')
+    title = request.json.get('title', [])
     menu_name = request.json.get('menu_name')
     menu_url = request.json.get('menu_url')
     menu_order = request.json.get('menu_order', 0)
     is_active = request.json.get('is_active', True)
 
+    # Kiểm tra required fields
     if not menu_name or not menu_url:
         return jsonify({'error': 'Menu name and URL are required'}), HTTP_400_BAD_REQUEST
 
-    # Kiểm tra title không quá 2 phần
-    if title and len(title.split(',')) > 2:
-        return jsonify({'error': 'Title can only have maximum 2 parts separated by comma'}), HTTP_400_BAD_REQUEST
+    # Đảm bảo title luôn là list trước khi xử lý
+    if not isinstance(title, list):
+        return jsonify({'error': 'Title must be an array of strings'}), HTTP_400_BAD_REQUEST
 
+    # Kiểm tra số lượng phần tử title
+    if len(title) > 2:
+        return jsonify({'error': 'Title can only have a maximum of 2 parts'}), HTTP_400_BAD_REQUEST
+
+    # Chuyển list thành string nếu có giá trị
+    title_str = ";".join(title) if title else ""
+
+    # Tạo đối tượng menu
     menu = Menu(
-        title=title,
+        title=title_str,
         menu_name=menu_name,
         menu_url=menu_url,
         menu_order=menu_order,
@@ -73,7 +82,7 @@ def create_menu():
 
     return jsonify({
         'id': menu.id,
-        'title': menu.title,
+        'title': menu.title.split(';') if menu.title else [],
         'menu_name': menu.menu_name,
         'menu_url': menu.menu_url,
         'menu_order': menu.menu_order,
@@ -81,6 +90,7 @@ def create_menu():
         'created_at': menu.created_at,
         'updated_at': menu.updated_at
     }), HTTP_201_CREATED
+
 
 @menu.put('/<int:id>')
 @jwt_required()

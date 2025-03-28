@@ -16,13 +16,17 @@ parameters:
         - "content"
       properties:
         title:
-          type: string
-          example: "About Me, My Journey"
-          description: "Maximum 2 titles separated by comma"
+          type: array
+          items:
+            type: string
+          example: ["About Me", "My Journey"]
+          description: "Maximum 2 titles, will be stored as a single string separated by semicolon ';'"
         content:
-          type: string
-          example: "Full-stack developer with 5 years experience, Passionate about web technologies, Expert in modern frameworks"
-          description: "Maximum 5 content points separated by comma"
+          type: array
+          items:
+            type: string
+          example: ["Full-stack developer with 5 years experience", "Passionate about web technologies", "Expert in modern frameworks"]
+          description: "Maximum 5 content points, will be stored as a single string separated by semicolon ';'"
         image:
           type: string
           example: "https://example.com/profile.jpg"
@@ -36,9 +40,13 @@ responses:
         id:
           type: integer
         title:
-          type: string
+          type: array
+          items:
+            type: string
         content:
-          type: string
+          type: array
+          items:
+            type: string
         image:
           type: string
         created_at:
@@ -49,19 +57,10 @@ responses:
           format: datetime
 
   400:
-    description: Bad request - Invalid input data
+    description: Bad request
     schema:
       type: object
       properties:
         error:
           type: string
-          example: "Title and content are required"
-
-  400:
-    description: Bad request - About information already exists
-    schema:
-      type: object
-      properties:
-        error:
-          type: string
-          example: "About information already exists. Please update instead."
+          example: "Title and content are required OR About information already exists. Please update instead."

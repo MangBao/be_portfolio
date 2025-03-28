@@ -20,7 +20,7 @@ class User(db.Model):
 
 class Menu(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200))  # Tối đa 2 title, ngăn cách bằng dấu phẩy
+    title = db.Column(db.String(200))  # Tối đa 2 title, ngăn cách bằng dấu chấm phẩy
     menu_name = db.Column(db.String(50), nullable=False)
     menu_url = db.Column(db.String(100), nullable=False)
     menu_order = db.Column(db.Integer, default=0)  # Thứ tự hiển thị menu
@@ -32,7 +32,7 @@ class Menu(db.Model):
 class About(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
-    content = db.Column(db.Text, nullable=False)  # Tối đa 5 content, ngăn cách bằng dấu phẩy
+    content = db.Column(db.Text, nullable=False)  # Tối đa 5 content, ngăn cách bằng dấu chấm phẩy
     image = db.Column(db.String(200))  # URL của hình ảnh
     created_at = db.Column(db.DateTime, default=datetime.now())
     updated_at = db.Column(db.DateTime, onupdate=datetime.now())

@@ -12,11 +12,15 @@ responses:
           type: integer
           example: 1
         title:
-          type: string
-          example: "About Me, My Journey"
+          type: array
+          items:
+            type: string
+          example: ["About Me", "My Journey"]
         content:
-          type: string
-          example: "Full-stack developer with 5 years experience, Passionate about web technologies, Expert in modern frameworks"
+          type: array
+          items:
+            type: string
+          example: ["Full-stack developer with 5 years experience", "Passionate about web technologies", "Expert in modern frameworks"]
         image:
           type: string
           example: "https://example.com/profile.jpg"
