@@ -57,6 +57,11 @@ def create_menu():
     if not menu_name or not menu_url:
         return jsonify({'error': 'Menu name and URL are required'}), HTTP_400_BAD_REQUEST
 
+    # Kiểm tra nếu menu_name đã tồn tại
+    existing_menu = Menu.query.filter_by(menu_name=menu_name).first()
+    if existing_menu:
+        return jsonify({'error': f'Menu name "{menu_name}" already exists'}), HTTP_400_BAD_REQUEST
+
     # Đảm bảo title luôn là list trước khi xử lý
     if not isinstance(title, list):
         return jsonify({'error': 'Title must be an array of strings'}), HTTP_400_BAD_REQUEST
