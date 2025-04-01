@@ -14,6 +14,7 @@ from flask_jwt_extended import JWTManager
 from flasgger import Swagger
 from src.configs.swagger import template, swagger_config
 from flask_cors import CORS
+from flask_migrate import Migrate
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
@@ -22,7 +23,7 @@ def create_app(test_config=None):
     if test_config is None:
         app.config.from_mapping(
             SECRET_KEY=os.environ.get("SECRET_KEY", "dev"),
-            SQLALCHEMY_DATABASE_URI=os.environ.get("SQLALCHEMY_DB_URI", "sqlite:///portfolio.db"),
+            SQLALCHEMY_DATABASE_URI=os.environ.get("FLASK_DB_URI", "postgresql+psycopg2://postgres:1301@localhost:5432/portfolio_db"),
             SQLALCHEMY_TRACK_MODIFICATIONS=False,
             JWT_SECRET_KEY=os.environ.get('JWT_SECRET_KEY', "dev"),
             
@@ -42,6 +43,9 @@ def create_app(test_config=None):
     # Initialize database
     db.app = app
     db.init_app(app)
+    
+    # Initialize Flask-Migrate
+    migrate = Migrate(app, db)
 
     # Initialize JWT
     JWTManager(app)
