@@ -16,8 +16,8 @@ def format_project(project):
         'project_url': project.project_url,
         'github_url': project.github_url,
         'technologies': project.technologies,
-        'start_date': project.start_date.strftime('%Y-%m-%d'),
-        'end_date': project.end_date.strftime('%Y-%m-%d') if project.end_date else None,
+        'start_date': project.start_date,
+        'end_date': project.end_date,
         'created_at': project.created_at,
         'updated_at': project.updated_at
     }
