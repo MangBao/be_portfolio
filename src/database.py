@@ -43,11 +43,12 @@ class Project(db.Model):
     title = db.Column(db.String(200), nullable=False)  # Thêm title cho project
     image = db.Column(db.String(200))
     description = db.Column(db.Text, nullable=False)
+    role = db.Column(db.Text, nullable=False)
     project_url = db.Column(db.String(200))  # URL của project (nếu có)
     github_url = db.Column(db.String(200))  # URL GitHub (nếu có)
     technologies = db.Column(db.String(200))  # Công nghệ sử dụng
-    start_date = db.Column(db.Date, nullable=False)
-    end_date = db.Column(db.Date)
+    start_date = db.Column(db.String(10), nullable=False)
+    end_date = db.Column(db.String(10))
     created_at = db.Column(db.DateTime, default=datetime.now())
     updated_at = db.Column(db.DateTime, onupdate=datetime.now())
 
@@ -56,7 +57,7 @@ class Skill(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     skill_name = db.Column(db.String(100), nullable=False)
     icon_skill = db.Column(db.String(200))  # URL của icon
-    short_desc = db.Column(db.String(200))
+    short_desc = db.Column(db.Text)
     proficiency = db.Column(db.Integer)  # Mức độ thành thạo (%)
     category = db.Column(db.String(50))  # Phân loại skill (Frontend, Backend, etc.)
     created_at = db.Column(db.DateTime, default=datetime.now())
@@ -69,8 +70,8 @@ class Experience(db.Model):
     role_name = db.Column(db.String(200), nullable=False)
     desc_role = db.Column(db.Text)  # Mô tả được ngăn cách bằng dấu chấm phẩy
     company_location = db.Column(db.String(200))  # Thêm địa điểm công ty
-    start_date = db.Column(db.Date, nullable=False)
-    end_date = db.Column(db.Date)
+    start_date = db.Column(db.String(10), nullable=False)
+    end_date = db.Column(db.String(10))
     is_current = db.Column(db.Boolean, default=False)  # Đánh dấu công việc hiện tại
     created_at = db.Column(db.DateTime, default=datetime.now())
     updated_at = db.Column(db.DateTime, onupdate=datetime.now())

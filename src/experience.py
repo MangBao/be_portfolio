@@ -12,10 +12,10 @@ def format_experience(experience):
         'id': experience.id,
         'company_name': experience.company_name,
         'role_name': experience.role_name,
-        'desc_role': experience.desc_role.split(';') if experience.desc_role else [],  # Chuyển string thành list
+        'desc_role': experience.desc_role,
         'company_location': experience.company_location,
-        'start_date': experience.start_date.strftime('%Y-%m-%d'),
-        'end_date': experience.end_date.strftime('%Y-%m-%d') if experience.end_date else None,
+        'start_date': experience.start_date,
+        'end_date': experience.end_date,
         'is_current': experience.is_current,
         'created_at': experience.created_at,
         'updated_at': experience.updated_at
