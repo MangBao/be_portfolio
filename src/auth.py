@@ -53,18 +53,15 @@ def register():
 @auth.post('/login')
 @swag_from('./docs/auth/login.yaml')
 def login():
-    email = request.json.get('email', '')
-    password = request.json.get('password', '')
+    try:
+        email = request.json.get('email', '')
+        password = request.json.get('password', '')
 
-    user = User.query.filter_by(email=email).first()
+        user = User.query.filter_by(email=email).first()
 
-    if user:
-        is_pass_correct = check_password_hash(user.password, password)
-
-        if is_pass_correct:
+        if user and check_password_hash(user.password, password):
             refresh = create_refresh_token(identity=str(user.id))
             access = create_access_token(identity=str(user.id))
-
             return jsonify({
                 'user': {
                     'refresh': refresh,
@@ -72,10 +69,14 @@ def login():
                     'username': user.username,
                     'email': user.email
                 }
-
             }), HTTP_200_OK
 
-    return jsonify({'error': 'Wrong credentials'}), HTTP_401_UNAUTHORIZED
+        return jsonify({'error': 'Wrong credentials'}), HTTP_401_UNAUTHORIZED
+
+    except Exception as e:
+        import traceback
+        print("❌ Exception in login:", traceback.format_exc())
+        return jsonify({'error': 'Internal Server Error'}), HTTP_500_INTERNAL_SERVER_ERROR
 
 
 @auth.get("/me")

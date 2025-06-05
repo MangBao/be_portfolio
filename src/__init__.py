@@ -23,7 +23,7 @@ def create_app(test_config=None):
     if test_config is None:
         app.config.from_mapping(
             SECRET_KEY=os.environ.get("SECRET_KEY", "dev"),
-            SQLALCHEMY_DATABASE_URI=os.environ.get("FLASK_DB_URI", "postgresql+psycopg2://postgres:1301@localhost:5432/portfolio_db"),
+            SQLALCHEMY_DATABASE_URI=os.environ.get("FLASK_DB_URI", "postgresql+psycopg2://postgres:MB1301%40dev@db.axlydpdhwrswmnvigbfy.supabase.co:5432/postgres?sslmode=require"),
             SQLALCHEMY_TRACK_MODIFICATIONS=False,
             JWT_SECRET_KEY=os.environ.get('JWT_SECRET_KEY', "dev"),
             
