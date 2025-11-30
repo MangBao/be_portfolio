@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from src.constants.http_status_code import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
+from src.constants.http_status_code import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 from src.database import Skill, db
 from flask_jwt_extended import jwt_required
 from flasgger import swag_from
@@ -98,10 +98,15 @@ def create_skill():
         category=category
     )
 
-    db.session.add(skill)
-    db.session.commit()
-
-    return jsonify(format_skill(skill)), HTTP_201_CREATED
+    try:
+        db.session.add(skill)
+        db.session.commit()
+        return jsonify(format_skill(skill)), HTTP_201_CREATED
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'error': 'Failed to create skill'
+        }), HTTP_500_INTERNAL_SERVER_ERROR
 
 @skill.put('/<int:id>')
 @skill.patch('/<int:id>')
@@ -132,15 +137,20 @@ def update_skill(id):
                 'error': 'Skill with this name already exists'
             }), HTTP_400_BAD_REQUEST
 
-    skill.skill_name = skill_name
-    skill.icon_skill = icon_skill
-    skill.short_desc = short_desc
-    skill.proficiency = proficiency
-    skill.category = category
+    try:
+        skill.skill_name = skill_name
+        skill.icon_skill = icon_skill
+        skill.short_desc = short_desc
+        skill.proficiency = proficiency
+        skill.category = category
 
-    db.session.commit()
-
-    return jsonify(format_skill(skill)), HTTP_200_OK
+        db.session.commit()
+        return jsonify(format_skill(skill)), HTTP_200_OK
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'error': 'Failed to update skill'
+        }), HTTP_500_INTERNAL_SERVER_ERROR
 
 @skill.delete('/<int:id>')
 @jwt_required()
@@ -150,12 +160,17 @@ def delete_skill(id):
     if not skill:
         return jsonify({'error': 'Skill not found'}), HTTP_404_NOT_FOUND
 
-    db.session.delete(skill)
-    db.session.commit()
-
-    return jsonify({
-        'message': 'Skill deleted successfully'
-    }), HTTP_200_OK
+    try:
+        db.session.delete(skill)
+        db.session.commit()
+        return jsonify({
+            'message': 'Skill deleted successfully'
+        }), HTTP_200_OK
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'error': 'Failed to delete skill'
+        }), HTTP_500_INTERNAL_SERVER_ERROR
 
 @skill.post('/batch')
 @jwt_required()

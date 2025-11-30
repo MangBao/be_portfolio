@@ -11,8 +11,8 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.Text(), nullable=False)
     role = db.Column(db.String(20), default='user')  # admin hoặc user
-    created_at = db.Column(db.DateTime, default=datetime.now())
-    updated_at = db.Column(db.DateTime, onupdate=datetime.now())
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
 
     def __repr__(self) -> str:
         return f'User>>> {self.username}'
@@ -25,8 +25,8 @@ class Menu(db.Model):
     menu_url = db.Column(db.String(100), nullable=False)
     menu_order = db.Column(db.Integer, default=0)  # Thứ tự hiển thị menu
     is_active = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=datetime.now())
-    updated_at = db.Column(db.DateTime, onupdate=datetime.now())
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
 
 
 class About(db.Model):
@@ -34,8 +34,8 @@ class About(db.Model):
     title = db.Column(db.String(200), nullable=False)
     content = db.Column(db.Text, nullable=False)  # Tối đa 5 content, ngăn cách bằng dấu chấm phẩy
     image = db.Column(db.String(200))  # URL của hình ảnh
-    created_at = db.Column(db.DateTime, default=datetime.now())
-    updated_at = db.Column(db.DateTime, onupdate=datetime.now())
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
 
 
 class Project(db.Model):
@@ -49,8 +49,8 @@ class Project(db.Model):
     technologies = db.Column(db.String(200))  # Công nghệ sử dụng
     start_date = db.Column(db.String(10), nullable=False)
     end_date = db.Column(db.String(10))
-    created_at = db.Column(db.DateTime, default=datetime.now())
-    updated_at = db.Column(db.DateTime, onupdate=datetime.now())
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
 
 
 class Skill(db.Model):
@@ -60,8 +60,8 @@ class Skill(db.Model):
     short_desc = db.Column(db.Text)
     proficiency = db.Column(db.Integer)  # Mức độ thành thạo (%)
     category = db.Column(db.String(50))  # Phân loại skill (Frontend, Backend, etc.)
-    created_at = db.Column(db.DateTime, default=datetime.now())
-    updated_at = db.Column(db.DateTime, onupdate=datetime.now())
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
 
 
 class Experience(db.Model):
@@ -73,8 +73,8 @@ class Experience(db.Model):
     start_date = db.Column(db.String(10), nullable=False)
     end_date = db.Column(db.String(10))
     is_current = db.Column(db.Boolean, default=False)  # Đánh dấu công việc hiện tại
-    created_at = db.Column(db.DateTime, default=datetime.now())
-    updated_at = db.Column(db.DateTime, onupdate=datetime.now())
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
 
 
 class Contact(db.Model):
@@ -84,5 +84,5 @@ class Contact(db.Model):
     subject = db.Column(db.String(200), nullable=False)
     content = db.Column(db.Text, nullable=False)
     status = db.Column(db.String(20), default='pending')  # Trạng thái: pending, replied, spam
-    created_at = db.Column(db.DateTime, default=datetime.now())
-    updated_at = db.Column(db.DateTime, onupdate=datetime.now())
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)

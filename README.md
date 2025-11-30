@@ -65,6 +65,19 @@ python main.py
 
 If you would like to contribute, please create a Pull Request or open an Issue on GitHub.
 
+## Docker Deployment
+
+Xem hướng dẫn chi tiết về Docker deployment tại [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
+
+### Quick Start với Docker
+
+1. Tạo file `.env` với các biến môi trường cần thiết
+2. Chạy lệnh:
+```bash
+docker-compose up --build
+```
+3. Truy cập API tại http://localhost:5000
+
 ## License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for more details.

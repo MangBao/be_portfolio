@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from src.constants.http_status_code import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
+from src.constants.http_status_code import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 from src.database import Contact, db
 from flask_jwt_extended import jwt_required
 from flasgger import swag_from
@@ -27,13 +27,19 @@ def get_contacts():
     per_page = request.args.get('per_page', 10, type=int)
     status = request.args.get('status')
     
+    # Validate pagination parameters
+    if page < 1:
+        page = 1
+    if per_page < 1 or per_page > 100:
+        per_page = min(max(per_page, 1), 100)  # Limit to max 100 items per page
+    
     query = Contact.query
     
     if status:
         query = query.filter_by(status=status)
     
     contacts = query.order_by(Contact.created_at.desc())\
-        .paginate(page=page, per_page=per_page)
+        .paginate(page=page, per_page=per_page, error_out=False)
     
     data = [format_contact(contact) for contact in contacts.items]
     
@@ -87,21 +93,37 @@ def create_contact():
             'error': 'Content must be at least 10 characters long'
         }), HTTP_400_BAD_REQUEST
     
-    contact = Contact(
-        name=name,
-        email=email,
-        subject=subject,
-        content=content,
-        status='pending'  # Default status
-    )
+    # Validate input lengths to prevent DoS
+    if len(name) > 100:
+        return jsonify({'error': 'Name is too long (max 100 characters)'}), HTTP_400_BAD_REQUEST
+    if len(email) > 120:
+        return jsonify({'error': 'Email is too long (max 120 characters)'}), HTTP_400_BAD_REQUEST
+    if len(subject) > 200:
+        return jsonify({'error': 'Subject is too long (max 200 characters)'}), HTTP_400_BAD_REQUEST
+    if len(content) > 5000:
+        return jsonify({'error': 'Content is too long (max 5000 characters)'}), HTTP_400_BAD_REQUEST
     
-    db.session.add(contact)
-    db.session.commit()
-    
-    return jsonify({
-        'message': 'Contact message sent successfully',
-        'contact': format_contact(contact)
-    }), HTTP_201_CREATED
+    try:
+        contact = Contact(
+            name=name,
+            email=email,
+            subject=subject,
+            content=content,
+            status='pending'  # Default status
+        )
+        
+        db.session.add(contact)
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Contact message sent successfully',
+            'contact': format_contact(contact)
+        }), HTTP_201_CREATED
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'error': 'Failed to create contact message'
+        }), HTTP_500_INTERNAL_SERVER_ERROR
 
 @contact.patch('/<int:id>/status')
 @jwt_required()
@@ -122,10 +144,15 @@ def update_contact_status(id):
             'error': f'Invalid status. Must be one of: {", ".join(valid_statuses)}'
         }), HTTP_400_BAD_REQUEST
     
-    contact.status = status
-    db.session.commit()
-    
-    return jsonify(format_contact(contact)), HTTP_200_OK
+    try:
+        contact.status = status
+        db.session.commit()
+        return jsonify(format_contact(contact)), HTTP_200_OK
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'error': 'Failed to update contact status'
+        }), HTTP_500_INTERNAL_SERVER_ERROR
 
 @contact.delete('/<int:id>')
 @jwt_required()
@@ -135,27 +162,36 @@ def delete_contact(id):
     if not contact:
         return jsonify({'error': 'Contact not found'}), HTTP_404_NOT_FOUND
     
-    db.session.delete(contact)
-    db.session.commit()
-    
-    return jsonify({
-        'message': 'Contact deleted successfully'
-    }), HTTP_200_OK
+    try:
+        db.session.delete(contact)
+        db.session.commit()
+        return jsonify({
+            'message': 'Contact deleted successfully'
+        }), HTTP_200_OK
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'error': 'Failed to delete contact'
+        }), HTTP_500_INTERNAL_SERVER_ERROR
 
 @contact.get('/stats')
 @jwt_required()
 @swag_from('./docs/contact/get_contact_stats.yaml')
 def get_contact_stats():
-    total = Contact.query.count()
-    pending = Contact.query.filter_by(status='pending').count()
-    replied = Contact.query.filter_by(status='replied').count()
-    spam = Contact.query.filter_by(status='spam').count()
+    # Optimize: Use single query with group_by instead of multiple queries
+    from sqlalchemy import func
+    stats = db.session.query(
+        Contact.status,
+        func.count(Contact.id).label('count')
+    ).group_by(Contact.status).all()
+    
+    stats_dict = {stat[0]: stat[1] for stat in stats}
     
     return jsonify({
-        'total': total,
-        'pending': pending,
-        'replied': replied,
-        'spam': spam
+        'total': sum(stats_dict.values()),
+        'pending': stats_dict.get('pending', 0),
+        'replied': stats_dict.get('replied', 0),
+        'spam': stats_dict.get('spam', 0)
     }), HTTP_200_OK
 
 @contact.get('/latest')

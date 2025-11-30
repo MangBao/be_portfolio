@@ -19,9 +19,15 @@ cache/
 *.sqlite
 migrations/
 
+# Ignore database backups
+*.backup
+*.dump
+*.sql.gz
+
 # Ignore environment variables
 .env
 .env.* 
+.flaskenv
 config.ini
 
 # Ignore IDE specific files

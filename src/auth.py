@@ -1,5 +1,5 @@
 from os import access
-from src.constants.http_status_code import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_409_CONFLICT
+from src.constants.http_status_code import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_500_INTERNAL_SERVER_ERROR
 from flask import Blueprint, app, request, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
 import validators
@@ -35,19 +35,25 @@ def register():
     if User.query.filter_by(username=username).first() is not None:
         return jsonify({'error': "username is taken"}), HTTP_409_CONFLICT
 
-    pwd_hash = generate_password_hash(password)
+    try:
+        pwd_hash = generate_password_hash(password)
 
-    user = User(username=username, password=pwd_hash, email=email)
-    db.session.add(user)
-    db.session.commit()
+        user = User(username=username, password=pwd_hash, email=email)
+        db.session.add(user)
+        db.session.commit()
 
-    return jsonify({
-        'message': "User created",
-        'user': {
-            'username': username, "email": email
-        }
+        return jsonify({
+            'message': "User created",
+            'user': {
+                'username': username, "email": email
+            }
 
-    }), HTTP_201_CREATED
+        }), HTTP_201_CREATED
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'error': 'Failed to create user'
+        }), HTTP_500_INTERNAL_SERVER_ERROR
 
 
 @auth.post('/login')
@@ -84,6 +90,8 @@ def login():
 def me():
     user_id = get_jwt_identity()
     user = User.query.filter_by(id=user_id).first()
+    if not user:
+        return jsonify({'error': 'User not found'}), HTTP_404_NOT_FOUND
     return jsonify({
         'username': user.username,
         'email': user.email

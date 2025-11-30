@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from src.constants.http_status_code import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
+from src.constants.http_status_code import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 from src.database import Menu, db
 from flask_jwt_extended import jwt_required
 from flasgger import swag_from
@@ -82,19 +82,24 @@ def create_menu():
         is_active=is_active
     )
 
-    db.session.add(menu)
-    db.session.commit()
-
-    return jsonify({
-        'id': menu.id,
-        'title': menu.title.split(';') if menu.title else [],
-        'menu_name': menu.menu_name,
-        'menu_url': menu.menu_url,
-        'menu_order': menu.menu_order,
-        'is_active': menu.is_active,
-        'created_at': menu.created_at,
-        'updated_at': menu.updated_at
-    }), HTTP_201_CREATED
+    try:
+        db.session.add(menu)
+        db.session.commit()
+        return jsonify({
+            'id': menu.id,
+            'title': menu.title.split(';') if menu.title else [],
+            'menu_name': menu.menu_name,
+            'menu_url': menu.menu_url,
+            'menu_order': menu.menu_order,
+            'is_active': menu.is_active,
+            'created_at': menu.created_at,
+            'updated_at': menu.updated_at
+        }), HTTP_201_CREATED
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'error': 'Failed to create menu'
+        }), HTTP_500_INTERNAL_SERVER_ERROR
 
 
 @menu.put('/<int:id>')
@@ -111,28 +116,43 @@ def update_menu(id):
     menu_order = request.json.get('menu_order', menu.menu_order)
     is_active = request.json.get('is_active', menu.is_active)
 
-    # Kiểm tra title không quá 2 phần
-    if title and len(title.split(',')) > 2:
-        return jsonify({'error': 'Title can only have maximum 2 parts separated by comma'}), HTTP_400_BAD_REQUEST
+    # Handle title conversion if it's a list
+    if isinstance(title, list):
+        if len(title) > 2:
+            return jsonify({'error': 'Title can only have a maximum of 2 parts'}), HTTP_400_BAD_REQUEST
+        title = ";".join(title)
+    elif title and isinstance(title, str) and len(title.split(';')) > 2:
+        return jsonify({'error': 'Title can only have maximum 2 parts separated by semicolon'}), HTTP_400_BAD_REQUEST
 
-    menu.title = title
-    menu.menu_name = menu_name
-    menu.menu_url = menu_url
-    menu.menu_order = menu_order
-    menu.is_active = is_active
+    try:
+        # Handle title conversion if it's a list
+        if isinstance(title, list):
+            if len(title) > 2:
+                return jsonify({'error': 'Title can only have a maximum of 2 parts'}), HTTP_400_BAD_REQUEST
+            title = ";".join(title)
+        
+        menu.title = title
+        menu.menu_name = menu_name
+        menu.menu_url = menu_url
+        menu.menu_order = menu_order
+        menu.is_active = is_active
 
-    db.session.commit()
-
-    return jsonify({
-        'id': menu.id,
-        'title': menu.title,
-        'menu_name': menu.menu_name,
-        'menu_url': menu.menu_url,
-        'menu_order': menu.menu_order,
-        'is_active': menu.is_active,
-        'created_at': menu.created_at,
-        'updated_at': menu.updated_at
-    }), HTTP_200_OK
+        db.session.commit()
+        return jsonify({
+            'id': menu.id,
+            'title': menu.title.split(';') if menu.title else [],
+            'menu_name': menu.menu_name,
+            'menu_url': menu.menu_url,
+            'menu_order': menu.menu_order,
+            'is_active': menu.is_active,
+            'created_at': menu.created_at,
+            'updated_at': menu.updated_at
+        }), HTTP_200_OK
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'error': 'Failed to update menu'
+        }), HTTP_500_INTERNAL_SERVER_ERROR
 
 @menu.delete('/<int:id>')
 @jwt_required()
@@ -142,10 +162,15 @@ def delete_menu(id):
     if not menu:
         return jsonify({'error': 'Menu not found'}), HTTP_404_NOT_FOUND
 
-    db.session.delete(menu)
-    db.session.commit()
-
-    return jsonify({'message': 'Menu deleted successfully'}), HTTP_200_OK
+    try:
+        db.session.delete(menu)
+        db.session.commit()
+        return jsonify({'message': 'Menu deleted successfully'}), HTTP_200_OK
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'error': 'Failed to delete menu'
+        }), HTTP_500_INTERNAL_SERVER_ERROR
 
 @menu.patch('/<int:id>/toggle-active')
 @jwt_required()
@@ -155,11 +180,16 @@ def toggle_menu_active(id):
     if not menu:
         return jsonify({'error': 'Menu not found'}), HTTP_404_NOT_FOUND
 
-    menu.is_active = not menu.is_active
-    db.session.commit()
-
-    return jsonify({
-        'id': menu.id,
-        'is_active': menu.is_active,
-        'message': f'Menu is now {"active" if menu.is_active else "inactive"}'
-    }), HTTP_200_OK
+    try:
+        menu.is_active = not menu.is_active
+        db.session.commit()
+        return jsonify({
+            'id': menu.id,
+            'is_active': menu.is_active,
+            'message': f'Menu is now {"active" if menu.is_active else "inactive"}'
+        }), HTTP_200_OK
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'error': 'Failed to toggle menu status'
+        }), HTTP_500_INTERNAL_SERVER_ERROR

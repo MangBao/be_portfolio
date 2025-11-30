@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from src.constants.http_status_code import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
+from src.constants.http_status_code import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 from src.database import Project, db
 from flask_jwt_extended import jwt_required
 from flasgger import swag_from
@@ -28,8 +28,14 @@ def get_projects():
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
     
+    # Validate pagination parameters
+    if page < 1:
+        page = 1
+    if per_page < 1 or per_page > 100:
+        per_page = min(max(per_page, 1), 100)  # Limit to max 100 items per page
+    
     projects = Project.query.order_by(Project.start_date.desc())\
-        .paginate(page=page, per_page=per_page)
+        .paginate(page=page, per_page=per_page, error_out=False)
     
     data = [format_project(project) for project in projects.items]
     
@@ -76,13 +82,19 @@ def create_project():
         }), HTTP_400_BAD_REQUEST
 
     try:
-        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+        # Parse start_date to string format YYYYMMDD for storage
+        start_date_parsed = datetime.strptime(start_date, '%Y-%m-%d')
+        start_date_str = start_date_parsed.strftime('%Y%m%d')
+        
         if end_date:
-            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
-            if end_date < start_date:
+            end_date_parsed = datetime.strptime(end_date, '%Y-%m-%d')
+            end_date_str = end_date_parsed.strftime('%Y%m%d')
+            if end_date_parsed < start_date_parsed:
                 return jsonify({
                     'error': 'End date cannot be earlier than start date'
                 }), HTTP_400_BAD_REQUEST
+        else:
+            end_date_str = None
     except ValueError:
         return jsonify({
             'error': 'Invalid date format. Use YYYY-MM-DD'
@@ -95,14 +107,19 @@ def create_project():
         project_url=project_url,
         github_url=github_url,
         technologies=technologies,
-        start_date=start_date,
-        end_date=end_date
+        start_date=start_date_str,
+        end_date=end_date_str
     )
 
-    db.session.add(project)
-    db.session.commit()
-
-    return jsonify(format_project(project)), HTTP_201_CREATED
+    try:
+        db.session.add(project)
+        db.session.commit()
+        return jsonify(format_project(project)), HTTP_201_CREATED
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'error': 'Failed to create project'
+        }), HTTP_500_INTERNAL_SERVER_ERROR
 
 @project.put('/<int:id>')
 @project.patch('/<int:id>')
@@ -124,8 +141,9 @@ def update_project(id):
 
     if start_date:
         try:
-            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
-            project.start_date = start_date
+            start_date_parsed = datetime.strptime(start_date, '%Y-%m-%d')
+            start_date_str = start_date_parsed.strftime('%Y%m%d')
+            project.start_date = start_date_str
         except ValueError:
             return jsonify({
                 'error': 'Invalid start date format. Use YYYY-MM-DD'
@@ -133,27 +151,35 @@ def update_project(id):
 
     if end_date:
         try:
-            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
-            if end_date < project.start_date:
+            # Get current start_date for comparison
+            current_start = datetime.strptime(project.start_date, '%Y%m%d') if project.start_date else None
+            end_date_parsed = datetime.strptime(end_date, '%Y-%m-%d')
+            end_date_str = end_date_parsed.strftime('%Y%m%d')
+            if current_start and end_date_parsed < current_start:
                 return jsonify({
                     'error': 'End date cannot be earlier than start date'
                 }), HTTP_400_BAD_REQUEST
-            project.end_date = end_date
+            project.end_date = end_date_str
         except ValueError:
             return jsonify({
                 'error': 'Invalid end date format. Use YYYY-MM-DD'
             }), HTTP_400_BAD_REQUEST
 
-    project.title = title
-    project.image = image
-    project.description = description
-    project.project_url = project_url
-    project.github_url = github_url
-    project.technologies = technologies
+    try:
+        project.title = title
+        project.image = image
+        project.description = description
+        project.project_url = project_url
+        project.github_url = github_url
+        project.technologies = technologies
 
-    db.session.commit()
-
-    return jsonify(format_project(project)), HTTP_200_OK
+        db.session.commit()
+        return jsonify(format_project(project)), HTTP_200_OK
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'error': 'Failed to update project'
+        }), HTTP_500_INTERNAL_SERVER_ERROR
 
 @project.delete('/<int:id>')
 @jwt_required()
@@ -163,12 +189,17 @@ def delete_project(id):
     if not project:
         return jsonify({'error': 'Project not found'}), HTTP_404_NOT_FOUND
 
-    db.session.delete(project)
-    db.session.commit()
-
-    return jsonify({
-        'message': 'Project deleted successfully'
-    }), HTTP_200_OK
+    try:
+        db.session.delete(project)
+        db.session.commit()
+        return jsonify({
+            'message': 'Project deleted successfully'
+        }), HTTP_200_OK
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'error': 'Failed to delete project'
+        }), HTTP_500_INTERNAL_SERVER_ERROR
 
 @project.get('/latest')
 @swag_from('./docs/project/get_latest_projects.yaml')

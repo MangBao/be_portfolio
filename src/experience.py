@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from src.constants.http_status_code import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
+from src.constants.http_status_code import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 from src.database import Experience, db
 from flask_jwt_extended import jwt_required
 from datetime import datetime
@@ -24,6 +24,7 @@ def format_experience(experience):
 @experience.get('/')
 @swag_from('./docs/experience/get_experiences.yaml')
 def get_experiences():
+    # Order by start_date as string (YYYYMMDD format) descending
     experiences = Experience.query.order_by(Experience.start_date.desc()).all()
     data = [format_experience(exp) for exp in experiences]
     
@@ -61,13 +62,19 @@ def create_experience():
         desc_role = ';'.join(desc_role)
 
     try:
-        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+        # Parse start_date to string format YYYYMMDD for storage
+        start_date_parsed = datetime.strptime(start_date, '%Y-%m-%d')
+        start_date_str = start_date_parsed.strftime('%Y%m%d')
+        
         if end_date and not is_current:
-            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
-            if end_date < start_date:
+            end_date_parsed = datetime.strptime(end_date, '%Y-%m-%d')
+            end_date_str = end_date_parsed.strftime('%Y%m%d')
+            if end_date_parsed < start_date_parsed:
                 return jsonify({
                     'error': 'End date cannot be earlier than start date'
                 }), HTTP_400_BAD_REQUEST
+        else:
+            end_date_str = None
     except ValueError:
         return jsonify({
             'error': 'Invalid date format. Use YYYY-MM-DD'
@@ -75,22 +82,27 @@ def create_experience():
 
     # If is_current is True, end_date should be None
     if is_current:
-        end_date = None
+        end_date_str = None
 
     experience = Experience(
         company_name=company_name,
         role_name=role_name,
         desc_role=desc_role,
         company_location=company_location,
-        start_date=start_date,
-        end_date=end_date,
+        start_date=start_date_str,
+        end_date=end_date_str,
         is_current=is_current
     )
 
-    db.session.add(experience)
-    db.session.commit()
-
-    return jsonify(format_experience(experience)), HTTP_201_CREATED
+    try:
+        db.session.add(experience)
+        db.session.commit()
+        return jsonify(format_experience(experience)), HTTP_201_CREATED
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'error': 'Failed to create experience'
+        }), HTTP_500_INTERNAL_SERVER_ERROR
 
 @experience.put('/<int:id>')
 @experience.patch('/<int:id>')
@@ -115,8 +127,9 @@ def update_experience(id):
 
     if start_date:
         try:
-            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
-            experience.start_date = start_date
+            start_date_parsed = datetime.strptime(start_date, '%Y-%m-%d')
+            start_date_str = start_date_parsed.strftime('%Y%m%d')
+            experience.start_date = start_date_str
         except ValueError:
             return jsonify({
                 'error': 'Invalid start date format. Use YYYY-MM-DD'
@@ -124,12 +137,15 @@ def update_experience(id):
 
     if end_date and not is_current:
         try:
-            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
-            if end_date < experience.start_date:
+            # Get current start_date for comparison
+            current_start = datetime.strptime(experience.start_date, '%Y%m%d') if experience.start_date else None
+            end_date_parsed = datetime.strptime(end_date, '%Y-%m-%d')
+            end_date_str = end_date_parsed.strftime('%Y%m%d')
+            if current_start and end_date_parsed < current_start:
                 return jsonify({
                     'error': 'End date cannot be earlier than start date'
                 }), HTTP_400_BAD_REQUEST
-            experience.end_date = end_date
+            experience.end_date = end_date_str
         except ValueError:
             return jsonify({
                 'error': 'Invalid end date format. Use YYYY-MM-DD'
@@ -139,15 +155,20 @@ def update_experience(id):
     if is_current:
         experience.end_date = None
 
-    experience.company_name = company_name
-    experience.role_name = role_name
-    experience.desc_role = desc_role
-    experience.company_location = company_location
-    experience.is_current = is_current
+    try:
+        experience.company_name = company_name
+        experience.role_name = role_name
+        experience.desc_role = desc_role
+        experience.company_location = company_location
+        experience.is_current = is_current
 
-    db.session.commit()
-
-    return jsonify(format_experience(experience)), HTTP_200_OK
+        db.session.commit()
+        return jsonify(format_experience(experience)), HTTP_200_OK
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'error': 'Failed to update experience'
+        }), HTTP_500_INTERNAL_SERVER_ERROR
 
 @experience.delete('/<int:id>')
 @jwt_required()
@@ -157,12 +178,17 @@ def delete_experience(id):
     if not experience:
         return jsonify({'error': 'Experience not found'}), HTTP_404_NOT_FOUND
 
-    db.session.delete(experience)
-    db.session.commit()
-
-    return jsonify({
-        'message': 'Experience deleted successfully'
-    }), HTTP_200_OK
+    try:
+        db.session.delete(experience)
+        db.session.commit()
+        return jsonify({
+            'message': 'Experience deleted successfully'
+        }), HTTP_200_OK
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'error': 'Failed to delete experience'
+        }), HTTP_500_INTERNAL_SERVER_ERROR
 
 @experience.get('/current')
 @swag_from('./docs/experience/get_current_experience.yaml')
