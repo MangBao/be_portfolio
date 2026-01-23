@@ -1,84 +1,103 @@
-# be_portfolio
+# Portfolio Backend API
 
-## Introduction
+Dự án Backend cho Portfolio cá nhân, được xây dựng bằng **Flask** và **PostgreSQL**, hỗ trợ deploy dễ dàng với **Docker**.
 
-`be_portfolio` is a backend API project designed to manage personal information and projects for a portfolio. The project is built using Python and Shell Script, making it easy to deploy and use.
+## 📝 Giới thiệu
 
-## Features
+Đây là RESTful API cung cấp dữ liệu cho ứng dụng Portfolio Frontend. Hệ thống quản lý các thông tin:
 
-- Manage personal information
-- Manage project categories
-- RESTful API for data retrieval
+- Thông tin cá nhân (Profile)
+- Dự án (Projects)
+- Kỹ năng (Skills)
+- Kinh nghiệm làm việc (Experiences)
+- Authentication (JWT)
 
-## System Requirements
+## 🛠 Yêu cầu hệ thống
 
-- Python 3.8+
-- Pip
-- Virtualenv (optional)
-- Required Python libraries (listed in `requirements.txt`)
+- **Docker** & **Docker Compose** (bắt buộc để chạy database và app)
+- **Python 3.x** (để chạy script setup tự động)
 
-## Installation Guide
+---
 
-### 1. Clone the repository
+## 🚀 Hướng dẫn Cài đặt & Chạy (Auto Setup)
 
-```sh
-git clone https://github.com/MangBao/be_portfolio.git
-cd be_portfolio
-```
+Dự án đi kèm với script `setup.py` giúp tự động hóa toàn bộ quy trình cấu hình và khởi chạy.
 
-### 2. Create and activate a virtual environment (optional)
+**Bước 1:** Mở terminal tại thư mục gốc dự án.
 
-```sh
-python -m venv venv
-source venv/bin/activate  # For Linux/macOS
-venv\Scripts\activate     # For Windows
-```
+**Bước 2:** Chạy lệnh setup:
 
-### 3. Install dependencies
-
-```sh
-pip install -r requirements.txt
-```
-
-### 4. Configure environment variables
-
-Create a `.env` file in the project's root directory and add the necessary environment variables:
-
-```env
-SECRET_KEY=your_secret_key
-DATABASE_URL=your_database_url
-```
-
-### 5. Run the project
-
-```sh
-python main.py
-```
-
-## API Endpoints
-
-- `GET /projects` - Retrieve a list of projects
-- `POST /projects` - Add a new project
-- `GET /profile` - Retrieve personal information
-
-## Contribution
-
-If you would like to contribute, please create a Pull Request or open an Issue on GitHub.
-
-## Docker Deployment
-
-Xem hướng dẫn chi tiết về Docker deployment tại [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
-
-### Quick Start với Docker
-
-1. Tạo file `.env` với các biến môi trường cần thiết
-2. Chạy lệnh:
 ```bash
-docker-compose up --build
+python setup.py
 ```
-3. Truy cập API tại http://localhost:5000
 
-## License
+**Bước 3:** Tại menu chính, chọn **Option 1** (`🚀 Quick Start`).
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for more details.
+- Script sẽ tự động kiểm tra Docker.
+- Tạo file `.env` với các secret key an toàn.
+- Build Docker images và khởi động containers.
 
+Sau khi hoàn tất, API sẽ sẵn sàng tại `http://localhost:5000`.
+
+---
+
+## ⚙️ Hướng dẫn Cài đặt Thủ công (Manual Setup)
+
+Nếu bạn muốn thiết lập từng bước mà không dùng script tự động:
+
+1. **Tạo file cấu hình môi trường (.env)**:
+   Copy file mẫu `.env.example` thành `.env`:
+
+   ```bash
+   # Windows
+   copy .env.example .env
+   # Linux/macOS
+   cp .env.example .env
+   ```
+
+   _Lưu ý: Cập nhật `SECRET_KEY` và `JWT_SECRET_KEY` trong file `.env` nếu cần bảo mật cao hơn._
+
+2. **Build Docker Images**:
+
+   ```bash
+   docker-compose build
+   ```
+
+3. **Khởi chạy Containers**:
+   Chạy ứng dụng ở chế độ background:
+
+   ```bash
+   docker-compose up -d
+   ```
+
+4. **Kiểm tra trạng thái**:
+   ```bash
+   docker-compose ps
+   ```
+
+## 📡 Thông tin Truy cập
+
+- **API Endpoint**: `http://localhost:5000`
+- **Database Host**: `localhost:5432`
+- **Tài khoản DB mặc định**:
+  - User: `portfolio_user`
+  - Pass: `portfolio_password`
+  - DB: `portfolio_db`
+
+## 📂 Cấu trúc Dự án
+
+```
+be_portfolio/
+├── src/                 # Source code Flask App
+├── docker-compose.yml   # Cấu hình Docker services
+├── Dockerfile           # Cấu hình build image
+├── setup.py             # Script tự động hóa
+├── requirements.txt     # Các thư viện Python
+└── database_schema...   # SQL khởi tạo database
+```
+
+## 🔧 Các lệnh thường dùng
+
+- **Xem logs**: `docker-compose logs -f`
+- **Dừng dự án**: `docker-compose down`
+- **Dừng và xóa volume dữ liệu**: `docker-compose down -v`
