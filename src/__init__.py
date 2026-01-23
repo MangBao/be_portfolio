@@ -21,11 +21,24 @@ def create_app(test_config=None):
     CORS(app)
 
     if test_config is None:
+        # Get required environment variables
+        secret_key = os.environ.get("SECRET_KEY")
+        jwt_secret_key = os.environ.get('JWT_SECRET_KEY')
+        db_uri = os.environ.get("FLASK_DB_URI")
+        
+        # Validate required environment variables
+        if not secret_key:
+            raise ValueError("SECRET_KEY environment variable is required. Please set it in .env file or environment.")
+        if not jwt_secret_key:
+            raise ValueError("JWT_SECRET_KEY environment variable is required. Please set it in .env file or environment.")
+        if not db_uri:
+            raise ValueError("FLASK_DB_URI environment variable is required. Please set it in .env file or environment.")
+        
         app.config.from_mapping(
-            SECRET_KEY=os.environ.get("SECRET_KEY", "dev"),
-            SQLALCHEMY_DATABASE_URI=os.environ.get("FLASK_DB_URI"),
+            SECRET_KEY=secret_key,
+            SQLALCHEMY_DATABASE_URI=db_uri,
             SQLALCHEMY_TRACK_MODIFICATIONS=False,
-            JWT_SECRET_KEY=os.environ.get('JWT_SECRET_KEY', "dev"),
+            JWT_SECRET_KEY=jwt_secret_key,
             
             # JWT Config
             JWT_ACCESS_TOKEN_EXPIRES=24*60*60,  # 24 hours
