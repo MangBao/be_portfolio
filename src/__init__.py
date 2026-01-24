@@ -90,37 +90,17 @@ def create_app(test_config=None):
     # Health check endpoint for Render
     @app.get('/health')
     def health_check():
-        """Health check endpoint to verify API and database connectivity"""
-        import traceback
-        try:
-            # Test database connection
-            from sqlalchemy import text
-            db.session.execute(text('SELECT 1'))
-            db.session.commit()  # Commit to avoid leaving transaction open
-            db_status = 'connected'
-        except Exception as e:
-            # Don't crash on database errors - still return healthy status
-            # This allows the app to start even if DB is temporarily unavailable
-            try:
-                db.session.rollback()  # Rollback failed transaction
-            except:
-                pass  # Ignore rollback errors
-            db_status = f'error: {str(e)}'
-            # Print full traceback for debugging
-            print("="*60)
-            print("Database connection error in /health:")
-            traceback.print_exc()
-            print("="*60)
+        """Simple health check endpoint - returns API status without DB check"""
+        from datetime import datetime
         
-        # Always return 200 OK so Render knows the app is running
-        # Even if DB is down, the app itself is healthy
-        response_data = {
+        # Simple health response without database check
+        # This ensures the endpoint always works even if DB is down
+        return jsonify({
             'status': 'healthy',
-            'database': db_status,
-            'message': 'Portfolio API is running'
-        }
-        print(f"Health check response: {response_data}")
-        return jsonify(response_data), HTTP_200_OK
+            'message': 'Portfolio API is running',
+            'version': '1.0.0',
+            'timestamp': datetime.now().isoformat()
+        }), HTTP_200_OK
 
     # Default route - redirect to API docs
     @app.get('/')
