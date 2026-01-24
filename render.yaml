@@ -1,0 +1,30 @@
+services:
+  # Web Service
+  - type: web
+    name: be-portfolio
+    env: python
+    region: singapore
+    plan: free
+    branch: main
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn wsgi:app
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: SECRET_KEY
+        sync: false
+      - key: JWT_SECRET_KEY
+        sync: false
+      - key: FLASK_DB_URI
+        sync: false
+      - key: FLASK_ENV
+        value: production
+    healthCheckPath: /
+
+  # Database (PostgreSQL) - Optional if you want Render-managed DB
+  # - type: pserv
+  #   name: be-portfolio-db
+  #   env: docker
+  #   plan: free
+  #   region: singapore

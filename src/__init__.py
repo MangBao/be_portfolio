@@ -1,6 +1,6 @@
 from http.client import HTTPException
 from flask import Flask, jsonify, redirect
-from src.constants.http_status_code import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
+from src.constants.http_status_code import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 import os
 from src.auth import auth
 from src.about import about
@@ -18,7 +18,19 @@ from flask_migrate import Migrate
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
-    CORS(app)
+    
+    # Configure CORS for production deployment
+    # Allow all origins for now - you can restrict this to specific domains later
+    CORS(app, resources={
+        r"/api/*": {
+            "origins": "*",
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"],
+            "expose_headers": ["Content-Type", "Authorization"],
+            "supports_credentials": True,
+            "max_age": 3600
+        }
+    })
 
     if test_config is None:
         # Get required environment variables
@@ -75,7 +87,42 @@ def create_app(test_config=None):
     # Initialize Swagger after registering blueprints
     Swagger(app, template=template, config=swagger_config)
 
-    # Default route
+    # Health check endpoint for Render
+    @app.get('/health')
+    def health_check():
+        """Health check endpoint to verify API and database connectivity"""
+        import traceback
+        try:
+            # Test database connection
+            from sqlalchemy import text
+            db.session.execute(text('SELECT 1'))
+            db.session.commit()  # Commit to avoid leaving transaction open
+            db_status = 'connected'
+        except Exception as e:
+            # Don't crash on database errors - still return healthy status
+            # This allows the app to start even if DB is temporarily unavailable
+            try:
+                db.session.rollback()  # Rollback failed transaction
+            except:
+                pass  # Ignore rollback errors
+            db_status = f'error: {str(e)}'
+            # Print full traceback for debugging
+            print("="*60)
+            print("Database connection error in /health:")
+            traceback.print_exc()
+            print("="*60)
+        
+        # Always return 200 OK so Render knows the app is running
+        # Even if DB is down, the app itself is healthy
+        response_data = {
+            'status': 'healthy',
+            'database': db_status,
+            'message': 'Portfolio API is running'
+        }
+        print(f"Health check response: {response_data}")
+        return jsonify(response_data), HTTP_200_OK
+
+    # Default route - redirect to API docs
     @app.get('/')
     def index():
         return redirect('/apidocs')
