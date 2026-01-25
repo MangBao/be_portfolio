@@ -35,6 +35,8 @@ def create_app(test_config=None):
         }
     })
 
+    print("FLASK_DB_URI =", os.getenv("FLASK_DB_URI"))
+
     if test_config is None:
         # Get required environment variables
         secret_key = os.environ.get("SECRET_KEY")

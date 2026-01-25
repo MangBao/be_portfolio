@@ -10,6 +10,9 @@ about = Blueprint("about", __name__, url_prefix="/api/v1/about")
 @swag_from('./docs/about/get_about.yaml')
 def get_about():
     about = About.query.first()
+
+    print("About information:", about)
+
     if not about:
         return jsonify({'message': 'No about information found'}), HTTP_404_NOT_FOUND
     
