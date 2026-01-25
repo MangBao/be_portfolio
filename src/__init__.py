@@ -133,3 +133,5 @@ def create_app(test_config=None):
             'error': 'Internal Server Error',
             'message': str(e) if current_app.debug else 'Something went wrong'
         }), HTTP_500_INTERNAL_SERVER_ERROR
+
+    return app
