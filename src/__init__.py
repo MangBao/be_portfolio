@@ -18,6 +18,9 @@ from flask_migrate import Migrate
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
+
+    app.config["DEBUG"] = True
+    app.config["PROPAGATE_EXCEPTIONS"] = True
     
     # Configure CORS for production deployment
     # Allow all origins for now - you can restrict this to specific domains later
