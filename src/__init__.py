@@ -106,6 +106,12 @@ def create_app(test_config=None):
             'version': '1.0.0',
             'timestamp': datetime.now().isoformat()
         }), HTTP_200_OK
+    
+    # Health check endpoint for Render
+    @app.get("/health/db")
+    def health_db():
+        db.session.execute(text("SELECT 1"))
+        return {"db": "ok"}
 
     # Default route - redirect to API docs
     @app.get('/')
@@ -115,8 +121,13 @@ def create_app(test_config=None):
     # Error handlers
     @app.errorhandler(Exception)
     def handle_exception(e):
+        # LOG RA STDERR để Render thấy
+        current_app.logger.error(traceback.format_exc())
+
         if isinstance(e, HTTPException):
             return jsonify({'error': e.description}), e.code
-        return jsonify({'error': 'Internal Server Error'}), HTTP_500_INTERNAL_SERVER_ERROR
 
-    return app
+        return jsonify({
+            'error': 'Internal Server Error',
+            'message': str(e) if current_app.debug else 'Something went wrong'
+        }), HTTP_500_INTERNAL_SERVER_ERROR
